@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roth vs Traditional 401(k) Calculator — after-tax comparison</title>
+<meta name="description" content="Compare a Roth and a traditional 401(k) or IRA on an after-tax basis. Enter age, contributions, return and tax rates to see which account leaves you with more money.">
+<link rel="canonical" href="https://jasonkg30-source.github.io/daily-tools/tools/roth-vs-traditional/">
+<style>
+  :root{
+    --ink:#12100e; --muted:#5f5a55; --line:#e3ded7; --bg:#fbf9f6; --card:#fff;
+    --accent:#1f5f4a; --accent-soft:#e7f0ec; --warn:#8a4b1f;
+    --radius:14px; --max:760px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  main{max-width:var(--max);margin:0 auto;padding:28px 20px 64px}
+  header.top{max-width:var(--max);margin:0 auto;padding:18px 20px;display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line)}
+  header.top a{color:var(--muted);text-decoration:none;font-size:14px}
+  h1{font-size:clamp(24px,4vw,34px);line-height:1.2;margin:18px 0 8px;letter-spacing:-.02em}
+  .lede{color:var(--muted);margin:0 0 26px;font-size:17px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+  form .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:560px){form .grid{grid-template-columns:1fr}}
+  label{display:block;font-size:13px;font-weight:600;letter-spacing:.01em;margin-bottom:6px}
+  label span{font-weight:400;color:var(--muted)}
+  input,select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff;color:inherit}
+  input:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+  .actions{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap}
+  button{font:inherit;font-weight:600;padding:11px 18px;border-radius:10px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+  button.ghost{background:transparent;color:var(--accent)}
+  button:active{transform:translateY(1px)}
+  .results{margin-top:22px;display:none}
+  .results.show{display:block}
+  .verdict{font-size:19px;font-weight:650;margin:0 0 14px}
+  .verdict small{display:block;font-weight:400;color:var(--muted);font-size:14px;margin-top:4px}
+  .bars{display:grid;gap:12px;margin:18px 0 6px}
+  .bar-row{display:grid;grid-template-columns:118px 1fr;gap:10px;align-items:center;font-size:14px}
+  .bar{height:26px;border-radius:7px;background:var(--accent-soft);position:relative;overflow:hidden}
+  .bar i{position:absolute;inset:0 auto 0 0;background:var(--accent);opacity:.85;border-radius:7px}
+  .bar b{position:relative;z-index:1;padding-left:9px;font-weight:600;font-size:13px;line-height:26px;color:#111}
+  .note{font-size:13px;color:var(--muted);margin-top:14px}
+  .tablewrap{overflow-x:auto;margin-top:8px}
+  table{border-collapse:collapse;width:100%;font-size:14px}
+  th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+  th:first-child,td:first-child{text-align:left}
+  th{font-weight:600;color:var(--muted);font-size:12.5px;text-transform:uppercase;letter-spacing:.04em}
+  section.faq{margin-top:34px}
+  section.faq h2{font-size:19px;margin:0 0 10px}
+  details{border-bottom:1px solid var(--line);padding:12px 0}
+  summary{cursor:pointer;font-weight:600}
+  details p{color:var(--muted);margin:8px 0 0}
+  footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+  .disclaimer{background:#fdf6ef;border:1px solid #f0dfcd;color:var(--warn);border-radius:10px;padding:12px 14px;font-size:13.5px;margin-top:24px}
+</style>
+</head>
+<body>
+<header class="top">
+  <a href="/daily-tools/">← Daily Tools</a>
+  <a href="#calc">Calculator</a>
+</header>
+<main>
+  <h1>Roth vs traditional 401(k): which leaves you more after tax?</h1>
+  <p class="lede">Most comparisons show pre-tax balances, which flatters the traditional account. This one taxes the traditional withdrawals and compares what you actually keep.</p>
+
+  <div class="card" id="calc">
+    <form id="f">
+      <div class="grid">
+        <div><label for="age">Current age</label><input id="age" type="number" value="35" min="16" max="80" step="1"></div>
+        <div><label for="retire">Retirement age</label><input id="retire" type="number" value="65" min="40" max="90" step="1"></div>
+        <div><label for="balance">Current balance <span>(optional)</span></label><input id="balance" type="number" value="25000" min="0" step="1000"></div>
+        <div><label for="contrib">Annual contribution <span>(pre-tax $)</span></label><input id="contrib" type="number" value="10000" min="0" step="500"></div>
+        <div><label for="ret">Expected annual return</label><input id="ret" type="number" value="7" min="0" max="15" step="0.5"></div>
+        <div><label for="taxnow">Tax rate now <span>(marginal %)</span></label><input id="taxnow" type="number" value="24" min="0" max="60" step="1"></div>
+        <div><label for="taxret">Tax rate in retirement <span>(%)</span></label><input id="taxret" type="number" value="22" min="0" max="60" step="1"></div>
+        <div><label for="match">Employer match <span>(% of contribution)</span></label><input id="match" type="number" value="0" min="0" max="100" step="1"></div>
+      </div>
+      <div class="actions">
+        <button type="submit">Compare</button>
+        <button type="button" class="ghost" id="copy">Copy link</button>
+      </div>
+    </form>
+
+    <div class="results" id="out" aria-live="polite">
+      <p class="verdict" id="verdict"></p>
+      <div class="bars" id="bars"></div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Account</th><th>Balance at retirement</th><th>Tax</th><th>After tax</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <p class="note" id="assumptions"></p>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    Educational estimate, not tax or investment advice. It ignores state taxes, RMDs, contribution limits, early-withdrawal penalties, and changes in tax law. Your employer match is always pre-tax. Talk to a licensed professional before acting.
+  </div>
+
+  <section class="faq">
+    <h2>How the comparison works</h2>
+    <details><summary>Why contributions differ between the two accounts</summary>
+      <p>A traditional contribution is made with pre-tax dollars, so $10,000 costs you $10,000 of salary. A Roth contribution is made with money you already paid tax on, so funding the same $10,000 of Roth space costs about $13,158 of salary at a 24% rate. To keep the comparison fair, this calculator holds the <em>take-home cost</em> constant and converts the Roth contribution to its after-tax equivalent.</p>
+    </details>
+    <details><summary>What the break-even tax rate means</summary>
+      <p>If your retirement tax rate equals your current rate, the two accounts tie (ignoring other factors). If you expect a lower rate later, the traditional account tends to win; if you expect a higher rate, Roth tends to win. Small rate changes move the result less than people expect over long horizons.</p>
+    </details>
+    <details><summary>Where the answer changes</summary>
+      <p>Roth is usually more valuable when you are in a low bracket now, expect rising rates, want tax diversification, or plan to leave the account to heirs. Traditional is usually more valuable when you are in a high bracket now, plan to retire into a lower bracket, or need the deduction to fund the contribution at all.</p>
+    </details>
+    <details><summary>Assumptions this tool makes</summary>
+      <p>Contributions are made at the end of each year, returns compound annually at a constant rate, and the existing balance is treated as pre-tax for the traditional account and after-tax for the Roth. Employer match is added to the traditional side and taxed at withdrawal. No fees are modeled.</p>
+    </details>
+  </section>
+
+  <footer>
+    Daily Tools — one small, honest utility built for a real search query. No accounts, no tracking beyond page views.
+  </footer>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const money = (n) => n.toLocaleString("en-US", {style:"currency", currency:"USD", maximumFractionDigits:0});
+const pct = (n) => (n*100).toFixed(1) + "%";
+
+function fv(balance, contrib, rate, years) {
+  let b = balance;
+  for (let i = 0; i < years; i++) b = b * (1 + rate) + contrib;
+  return b;
+}
+
+function compute() {
+  const age = +$("age").value, retire = +$("retire").value;
+  const balance = +$("balance").value || 0;
+  const contrib = +$("contrib").value || 0;
+  const rate = (+$("ret").value || 0) / 100;
+  const taxNow = (+$("taxnow").value || 0) / 100;
+  const taxRet = (+$("taxret").value || 0) / 100;
+  const match = (+$("match").value || 0) / 100;
+  const years = Math.max(0, retire - age);
+
+  // Hold the after-tax cost of the contribution constant.
+  const rothContrib = contrib * (1 - taxNow);
+  const tradEmployer = contrib * match;
+
+  const tradBalance = fv(balance, contrib + tradEmployer, rate, years);
+  const rothBalance = fv(balance, rothContrib, rate, years);
+
+  const tradTax = tradBalance * taxRet;
+  const tradNet = tradBalance - tradTax;
+  const rothNet = rothBalance;
+
+  const diff = rothNet - tradNet;
+  const winner = diff > 0 ? "Roth" : "Traditional";
+  const max = Math.max(tradNet, rothNet) || 1;
+
+  $("verdict").innerHTML = `${winner} leaves you about <strong>${money(Math.abs(diff))} more</strong> after tax` +
+    `<small>${years} years of growth, ${pct(taxNow)} now vs ${pct(taxRet)} in retirement</small>`;
+
+  $("bars").innerHTML = [
+    ["Traditional", tradNet],
+    ["Roth", rothNet],
+  ].map(([label, value]) => `
+    <div class="bar-row">
+      <div>${label}</div>
+      <div class="bar"><i style="width:${(value / max * 100).toFixed(1)}%"></i><b>${money(value)}</b></div>
+    </div>`).join("");
+
+  $("rows").innerHTML = `
+    <tr><td>Traditional</td><td>${money(tradBalance)}</td><td>−${money(tradTax)}</td><td>${money(tradNet)}</td></tr>
+    <tr><td>Roth</td><td>${money(rothBalance)}</td><td>${money(0)}</td><td>${money(rothNet)}</td></tr>`;
+
+  $("assumptions").textContent =
+    `Roth contribution funded with ${money(rothContrib)}/yr after tax, equal to ${money(contrib)}/yr pre-tax. ` +
+    (tradEmployer ? `Employer match ${money(tradEmployer)}/yr goes to the traditional side and is taxed at withdrawal. ` : "") +
+    `Returns compound annually; contributions are made at year end.`;
+
+  $("out").classList.add("show");
+  return {age, retire, balance, contrib, rate, taxNow, taxRet, match};
+}
+
+function syncURL() {
+  const p = new URLSearchParams();
+  [["age","age"],["retire","retire"],["balance","balance"],["contrib","contrib"],
+   ["ret","ret"],["taxnow","taxnow"],["taxret","taxret"],["match","match"]]
+    .forEach(([k, id]) => p.set(k, $(id).value));
+  history.replaceState(null, "", "?" + p.toString());
+}
+
+function loadURL() {
+  const p = new URLSearchParams(location.search);
+  [["age","age"],["retire","retire"],["balance","balance"],["contrib","contrib"],
+   ["ret","ret"],["taxnow","taxnow"],["taxret","taxret"],["match","match"]]
+    .forEach(([k, id]) => { if (p.has(k)) $(id).value = p.get(k); });
+}
+
+$("f").addEventListener("submit", (e) => { e.preventDefault(); compute(); syncURL(); });
+["age","retire","balance","contrib","ret","taxnow","taxret","match"].forEach((id) =>
+  $(id).addEventListener("input", () => { compute(); syncURL(); }));
+
+$("copy").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(location.href); $("copy").textContent = "Copied"; }
+  catch { $("copy").textContent = "Copy failed"; }
+  setTimeout(() => $("copy").textContent = "Copy link", 1500);
+});
+
+loadURL();
+compute();
+</script>
+</body>
+</html>
