@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Loan Extra Payment Calculator — what a monthly extra is worth</title>
+<meta name="description" content="See how much a monthly extra payment saves on your student loan: months earlier payoff and total interest skipped. Free, no signup.">
+<link rel="canonical" href="https://jasonkg30-source.github.io/daily-tools/tools/student-loan-extra-payment/">
+<style>
+  :root{
+    --ink:#12100e; --muted:#5f5a55; --line:#e3ded7; --bg:#fbf9f6; --card:#fff;
+    --accent:#1f5f4a; --accent-soft:#e7f0ec; --warn:#8a4b1f;
+    --radius:14px; --max:760px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  main{max-width:var(--max);margin:0 auto;padding:28px 20px 64px}
+  header.top{max-width:var(--max);margin:0 auto;padding:18px 20px;display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line)}
+  header.top a{color:var(--muted);text-decoration:none;font-size:14px}
+  h1{font-size:clamp(24px,4vw,34px);line-height:1.2;margin:18px 0 8px;letter-spacing:-.02em}
+  .lede{color:var(--muted);margin:0 0 26px;font-size:17px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+  form .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:560px){form .grid{grid-template-columns:1fr}}
+  label{display:block;font-size:13px;font-weight:600;letter-spacing:.01em;margin-bottom:6px}
+  label span{font-weight:400;color:var(--muted)}
+  input,select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff;color:inherit}
+  input:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+  .actions{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap}
+  button{font:inherit;font-weight:600;padding:11px 18px;border-radius:10px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+  button.ghost{background:transparent;color:var(--accent)}
+  button:active{transform:translateY(1px)}
+  .results{margin-top:22px}
+  .verdict{font-size:19px;font-weight:650;margin:0 0 14px}
+  .verdict small{display:block;font-weight:400;color:var(--muted);font-size:14px;margin-top:4px}
+  .bars{display:grid;gap:12px;margin:0 0 6px}
+  .bar-row{display:grid;grid-template-columns:118px 1fr;gap:10px;align-items:center;font-size:14px}
+  .bar{height:26px;border-radius:7px;background:var(--accent-soft);position:relative;overflow:hidden}
+  .bar i{position:absolute;inset:0 auto 0 0;background:var(--accent);opacity:.85;border-radius:7px}
+  .bar b{position:relative;z-index:1;padding-left:9px;font-weight:600;font-size:13px;line-height:26px;color:#111}
+  .note{font-size:13px;color:var(--muted);margin-top:14px}
+  .warn-inline{color:var(--warn);font-weight:600}
+  .tablewrap{overflow-x:auto;margin:14px 0 0}
+  table{border-collapse:collapse;width:100%;font-size:14px}
+  th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+  th:first-child,td:first-child{text-align:left}
+  th{font-weight:600;color:var(--muted);font-size:12.5px;text-transform:uppercase;letter-spacing:.04em}
+  section.faq{margin-top:34px}
+  section.faq h2{font-size:19px;margin:0 0 10px}
+  details{border-bottom:1px solid var(--line);padding:12px 0}
+  summary{cursor:pointer;font-weight:600}
+  details p{color:var(--muted);margin:8px 0 0}
+  footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+  .disclaimer{background:#fdf6ef;border:1px solid #f0dfcd;color:var(--warn);border-radius:10px;padding:12px 14px;font-size:13.5px;margin-top:24px}
+</style>
+</head>
+<body>
+<header class="top">
+  <a href="/daily-tools/">← Daily Tools</a>
+  <a href="#calc">Calculator</a>
+</header>
+<main>
+  <h1>What is an extra student loan payment actually worth?</h1>
+  <p class="lede">Add one extra amount to your monthly student loan payment and see how much faster you finish and how much total interest you skip.</p>
+
+  <div class="card" id="calc">
+    <form id="f">
+      <div class="grid">
+        <div><label for="balance">Loan balance <span>($)</span></label><input id="balance" type="number" value="30000" min="0" step="100"></div>
+        <div><label for="rate">Annual interest rate <span>(APR %)</span></label><input id="rate" type="number" value="6.5" min="0" max="20" step="0.05"></div>
+        <div><label for="payment">Monthly payment <span>($)</span></label><input id="payment" type="number" value="350" min="1" step="10"></div>
+        <div><label for="extra">Extra added each month <span>($)</span></label><input id="extra" type="number" value="50" min="0" step="10"></div>
+        <div><label for="autodate">Payment date <span>(autopay)</span></label>
+          <select id="autodate">
+            <option value="na">No autopay</option>
+            <option value="025">0.25% autopay discount</option>
+          </select>
+        </div>
+      </div>
+      <div class="actions">
+        <button type="submit">Calculate</button>
+        <button type="button" class="ghost" id="copy">Copy link</button>
+      </div>
+    </form>
+
+    <div class="results" id="out" aria-live="polite">
+      <p class="verdict" id="verdict"></p>
+      <div class="bars" id="bars"></div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Plan</th><th>Payoff</th><th>Total interest</th><th>Int. saved</th><th>Payoff gain</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <p class="note" id="assumptions"></p>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    Educational estimate, not financial advice. Results assume fixed-rate loans, no fees, and that extra payments go entirely to principal. Federal loans carry borrower protections that prepaying gives up — check your loan details before paying extra. Rates vary by lender and by loan type.
+  </div>
+
+  <section class="faq">
+    <h2>How this is calculated</h2>
+    <details><summary>The actual formula</summary>
+      <p>Each month the balance grows by interest first: interest = balance × APR ÷ 12. The payment then reduces the balance. The simulation repeats until nothing is left, so extra payments shorten the term (fewer payments) and skip that many months of interest. Payoff length in years is the final payment count ÷ 12.</p>
+    </details>
+    <details><summary>Why an early extra payment beats a later one</summary>
+      <p>Principal removed today stops compounding for every remaining month of the loan; the same dollar paid in year 9 only stops a few months of interest. Earlier is strictly better at any positive APR. This page shows the same loan with a fixed extra from month one, so the benefit shown is the front-loaded maximum.</p>
+    </details>
+    <details><summary>Prepayment penalty and the 0.25% autopay discount</summary>
+      <p>Federal and most private US student loans have no prepayment penalty, so extra principal costs nothing beyond the cash itself. Many servicers apply a small rate discount for auto-debit payments; select it above and both payoff and interest reflect the discounted rate.</p>
+    </details>
+    <details><summary>Assumptions this tool makes</summary>
+      <p>A fixed rate for the whole life of the loan (a reasonable fit for most student loans), no fees, contributions applied at month end, and the servicer applies extra dollars to principal rather than future payments (you usually have to instruct this).</p>
+    </details>
+  </section>
+
+  <footer>
+    Daily Tools — one small, honest utility built for a real search query. No accounts, no tracking beyond page views.
+  </footer>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const money = (n) => n.toLocaleString("en-US", {style:"currency", currency:"USD", maximumFractionDigits:0});
+
+// Simulate month-by-month amortization. Returns months and total interest paid.
+function simulate(balance, monthlyRate, payment) {
+  let interestTotal = 0;
+  let months = 0;
+  let b = balance;
+  while (b > 0.005 && months < 1205) {
+    const interest = b * monthlyRate;
+    b += interest;
+    // A payment can't exceed the balance plus its own interest.
+    const pay = Math.min(payment, b);
+    interestTotal += interest;
+    b -= pay;
+    months += 1;
+  }
+  return { months: (b > 0.005 ? null : months), interestTotal };
+}
+
+function compute() {
+  const balance = +$("balance").value || 0;
+  const apr = (+$("rate").value || 0) / 100;
+  const extra = +$("extra").value || 0;
+  let rate = apr;
+  if ($("autodate").value === "025") rate = apr - 0.0025;
+
+  if (balance <= 0 || apr < 0) {
+    $("verdict").textContent = "Enter a positive loan balance.";
+    $("rows").innerHTML = "";
+    $("bars").innerHTML = "";
+    $("assumptions").textContent = "";
+    return { monthsBase: null, monthsWith: null };
+  }
+
+  const payment = +$("payment").value || 0;
+  const baseline = simulate(balance, rate / 12, payment);
+  const withExtra = extra > 0 && baseline.months ? simulate(balance, rate / 12, payment + extra) : null;
+
+  if (!baseline.months) {
+    $("verdict").textContent = payment <= 0
+      ? "Enter a monthly payment."
+      : `At ${money(payment)}/month this payment never gets ahead of the monthly interest — the loan would take over 100 years.`;
+    $("rows").innerHTML = "";
+    $("bars").innerHTML = "";
+    $("assumptions").textContent = "";
+    return { monthsBase: null, monthsWith: null };
+  }
+
+  const interestSaved = withExtra ? baseline.interestTotal - withExtra.interestTotal : 0;
+  const monthsFaster = withExtra ? baseline.months - withExtra.months : 0;
+
+  $("verdict").innerHTML = withExtra
+    ? `An extra <strong>${money(extra)}</strong>/month pays the loan off <strong>${monthsFaster} months earlier</strong> and saves <strong>${money(interestSaved)}</strong> in interest` +
+      `<small>${money(payment)}/month baseline, ${monthsFaster} fewer payments, ${(rate * 100).toFixed(2)}% APR</small>`
+    : `Baseline: ${money(payment)}/month pays off in ${(baseline.months / 12).toFixed(1)} years with ${money(baseline.interestTotal)} interest` +
+      `<small>Enter an extra amount to compare</small>`;
+
+  const rows = [["Baseline", baseline]];
+  if (withExtra) rows.push(["With extra", withExtra]);
+  $("rows").innerHTML = rows.map(([label, sim]) => `
+    <tr><td>${label}</td><td>${(sim.months / 12).toFixed(1)} yrs</td><td>${money(sim.interestTotal)}</td>
+    <td>${label === "With extra" ? money(interestSaved) : "—"}</td>
+    <td>${label === "With extra" ? `${monthsFaster} mo` : "—"}</td></tr>`).join("");
+
+  const maxI = Math.max(baseline.interestTotal, (withExtra || baseline).interestTotal) || 1;
+  $("bars").innerHTML = rows.map(([label, sim]) => `
+    <div class="bar-row">
+      <div>${label}</div>
+      <div class="bar"><i style="width:${(sim.interestTotal / maxI * 100).toFixed(1)}%"></i><b>${money(sim.interestTotal)}</b></div>
+    </div>`).join("");
+
+  $("assumptions").textContent = withExtra
+    ? `Same ${money(payment)}/month payment, plus ${money(extra)} extra each month. Assumes a fixed rate, no fees, and that the servicer applies extra to principal.`
+    : "Assumes a fixed rate, no fees, extra payments go to principal.";
+
+  return { monthsBase: baseline.months, monthsWith: withExtra ? withExtra.months : null, interestSaved,
+           baselineInterest: baseline.interestTotal, withExtraInterest: withExtra ? withExtra.interestTotal : null };
+}
+
+function syncURL() {
+  const p = new URLSearchParams();
+  [["balance","balance"],["rate","rate"],["payment","payment"],["extra","extra"],["autodate","autodate"]]
+    .forEach(([k, id]) => p.set(k, $(id).value));
+  history.replaceState(null, "", "?" + p.toString());
+}
+
+function loadURL() {
+  const p = new URLSearchParams(location.search);
+  [["balance","balance"],["rate","rate"],["payment","payment"],["extra","extra"],["autodate","autodate"]]
+    .forEach(([k, id]) => { if (p.has(k)) $(id).value = p.get(k); });
+}
+
+$("f").addEventListener("submit", (e) => { e.preventDefault(); compute(); syncURL(); });
+["balance","rate","payment","extra","autodate"].forEach((id) =>
+  $(id).addEventListener("input", () => { compute(); syncURL(); }));
+
+$("copy").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(location.href); $("copy").textContent = "Copied"; }
+  catch { $("copy").textContent = "Copy failed"; }
+  setTimeout(() => $("copy").textContent = "Copy link", 1500);
+});
+
+loadURL();
+compute();
+</script>
+</body>
+</html>
