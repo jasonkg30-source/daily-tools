@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Restaurant Tip Calculator — tip, split the bill, per person</title>
+<meta name="description" content="See exact tip and per-person amounts on any restaurant bill. 15%, 18%, 20% presets, round-up tip, and easy bill splitting for any group.">
+<link rel="canonical" href="https://jasonkg30-source.github.io/daily-tools/tools/restaurant-tip-calculator/">
+<style>
+  :root{
+    --ink:#12100e; --muted:#5f5a55; --line:#e3ded7; --bg:#fbf9f6; --card:#fff;
+    --accent:#1f5f4a; --accent-soft:#e7f0ec; --warn:#8a4b1f;
+    --radius:14px; --max:760px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  main{max-width:var(--max);margin:0 auto;padding:28px 20px 64px}
+  header.top{max-width:var(--max);margin:0 auto;padding:18px 20px;display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line)}
+  header.top a{color:var(--muted);text-decoration:none;font-size:14px}
+  h1{font-size:clamp(24px,4vw,34px);line-height:1.2;margin:18px 0 8px;letter-spacing:-.02em}
+  .lede{color:var(--muted);margin:0 0 26px;font-size:17px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+  form .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:560px){form .grid{grid-template-columns:1fr}}
+  label{display:block;font-size:13px;font-weight:600;letter-spacing:.01em;margin-bottom:6px}
+  label span{font-weight:400;color:var(--muted)}
+  input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff;color:inherit}
+  input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+  .pctrow{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 4px}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:14px;border:1px solid var(--line);border-radius:999px;padding:6px 13px;cursor:pointer;font-weight:600}
+  .chip input{width:auto;flex:none;accent-color:var(--accent);margin:0}
+  .chip:hover{border-color:var(--accent)}
+  .check{display:flex;align-items:center;gap:9px;font-size:14px;margin-top:2px}
+  .check input{width:auto;flex:none;accent-color:var(--accent)}
+  .actions{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap}
+  button{font:inherit;font-weight:600;padding:11px 18px;border-radius:10px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+  button.ghost{background:transparent;color:var(--accent)}
+  button:active{transform:translateY(1px)}
+  .results{margin-top:22px;display:none}
+  .results.show{display:block}
+  .biglabel{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:0 0 4px;font-weight:600}
+  .bignum{font-size:clamp(36px,7vw,44px);font-weight:700;letter-spacing:-.02em;margin:0 0 6px}
+  .verdict{font-size:14px;color:var(--muted);margin:0 0 16px}
+  .subgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  @media (max-width:560px){.subgrid{grid-template-columns:1fr}}
+  .subgrid .cell{background:var(--accent-soft);border-radius:10px;padding:10px 12px}
+  .subgrid .cell .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .subgrid .cell .v{font-weight:650;font-size:17px}
+  .bars{display:grid;gap:12px;margin:8px 0 6px}
+  .bar-row{display:grid;grid-template-columns:118px 1fr;gap:10px;align-items:center;font-size:14px}
+  .bar{height:26px;border-radius:7px;background:var(--accent-soft);position:relative;overflow:hidden}
+  .bar i{position:absolute;inset:0 auto 0 0;background:var(--accent);opacity:.85;border-radius:7px}
+  .bar b{position:relative;z-index:1;padding-left:9px;font-weight:600;font-size:13px;line-height:26px;color:#111}
+  .note{font-size:13px;color:var(--muted);margin-top:14px}
+  section.faq{margin-top:34px}
+  section.faq h2{font-size:19px;margin:0 0 10px}
+  details{border-bottom:1px solid var(--line);padding:12px 0}
+  summary{cursor:pointer;font-weight:600}
+  details p{color:var(--muted);margin:8px 0 0}
+  .formula{background:var(--accent-soft);border-radius:10px;padding:12px 14px;font-size:14.5px;margin:8px 0 0}
+  footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+  .disclaimer{background:#fdf6ef;border:1px solid #f0dfcd;color:var(--warn);border-radius:10px;padding:12px 14px;font-size:13.5px;margin-top:24px}
+</style>
+</head>
+<body>
+<header class="top">
+  <a href="/daily-tools/">← Daily Tools</a>
+  <a href="#calc">Tip calculator</a>
+</header>
+<main>
+  <h1>Restaurant tip calculator</h1>
+  <p class="lede">Enter the bill, pick a percent, and see the exact tip, grand total and per-person share before you close the check.</p>
+
+  <div class="card" id="calc">
+    <form id="f">
+      <div class="grid">
+        <div><label for="bill">Bill amount <span>($)</span></label><input id="bill" type="number" value="58.40" min="0" step="0.01"></div>
+        <div><label for="tipPct">Tip percent <span>(%)</span></label><input id="tipPct" type="number" value="18" min="0" max="100" step="0.5"></div>
+        <div><label for="party">Party size <span>(1 = not splitting)</span></label><input id="party" type="number" value="2" min="1" max="50" step="1"></div>
+        <div><label for="taxPct">Sales tax rate <span>(%, optional)</span></label><input id="taxPct" type="number" value="0" min="0" max="25" step="0.1"></div>
+        <div style="grid-column:1/-1">
+          <label>Quick presets</label>
+          <div class="pctrow">
+            <label class="chip"><input type="radio" name="pct" value="15"> 15%</label>
+            <label class="chip"><input type="radio" name="pct" value="18" checked> 18%</label>
+            <label class="chip"><input type="radio" name="pct" value="20"> 20%</label>
+            <label class="chip"><input type="radio" name="pct" value="25"> 25%</label>
+          </div>
+          <div class="check"><input id="tipOnTax" type="checkbox"> Tip on tax too <span>(pre-tax amounts only, by default)</span></div>
+          <div class="check"><input id="roundUp" type="checkbox"> Round the tip up to the next whole dollar</div>
+        </div>
+      </div>
+      <div class="actions">
+        <button type="submit">Calculate tip</button>
+        <button type="button" class="ghost" id="copy">Copy link</button>
+      </div>
+    </form>
+
+    <div class="results" id="out" aria-live="polite">
+      <p class="biglabel" id="bigLabel">Tip on $58.40 at 18%</p>
+      <p class="bignum" id="bigNum">$10.51</p>
+      <p class="verdict" id="verdict"></p>
+      <div class="subgrid" id="subgrid"></div>
+      <div class="bars" id="bars"></div>
+      <p class="note" id="explain"></p>
+    </div>
+
+    <noscript>
+      <div class="formula">
+        <strong>JavaScript is off — here is the math:</strong><br>
+        tip = bill × percent.<br>
+        Example: $58.40 × 18% = <strong>$10.51 tip</strong>; grand total = $58.40 + $10.51 = <strong>$68.91</strong>.
+        Splitting 2 ways: $68.91 ÷ 2 = <strong>$34.46</strong> each.<br>
+        15% is a quick mental shortcut: move the bill's decimal one place left, then take half of that (10% + 5%).<br>
+        Enable JavaScript to calculate your own numbers in one tap.
+      </div>
+    </noscript>
+  </div>
+
+  <div class="disclaimer">
+    A tip is a gratuity for good service — any percentage shown here is a suggestion, and 0% is always allowed for poor service. Tipping norms vary by region and service type. This tool is an educational calculator, not financial advice; it does not include delivery-service, hotel or tipping-jar customs. Some U.S. restaurants add a mandatory service charge or auto-gratuity for large parties — check your receipt first so you don't tip twice.
+  </div>
+
+  <section class="faq">
+    <h2>How this is calculated</h2>
+    <details><summary>What is the formula?</summary>
+      <p>Tip = bill × tip&nbsp;percent ÷ 100. Total = bill + tip (+ sales tax if you entered a tax rate). Per person = total ÷ party size. At $58.40 with an 18% tip: tip = $58.40 × 0.18 = $10.51, total = $68.91, and $34.46 per person for a party of 2.</p>
+    </details>
+    <details><summary>Should I tip on tax?</summary>
+      <p>Etiquette guides say gratuity should be calculated on the pre-tax bill — the service you received has nothing to do with the tax rate. By default this calculator follows that convention and taxes only shift the grand total. Check "Tip on tax too" if a restaurant's suggested-tip panels (which are usually computed on the taxed total) are what you want to match.</p>
+    </details>
+    <details><summary>How do I count a tip mentally?</summary>
+      <p>Move the bill's decimal point one place left for 10%, then double it for 20% — or for 15%, take 10% plus half of that. On a $58.40 bill: 10% is about $5.84, so 20% is about $11.68 and 15% is about $8.76. Rounding the tip up to the next dollar is the classic tidy trick this tool can do for you.</p>
+    </details>
+    <details><summary>How much should I tip at a restaurant in the U.S.?</summary>
+      <p>Common ranges are 15% for adequate service, 18–20% for good service, and 20–25% for excellent service — percentages are suggestions, not obligations. A flat dollar amount is fine for counter service or small checks. What matters most: tip in a way that reflects the service you got.</p>
+    </details>
+    <details><summary>How does splitting the bill work for uneven orders?</summary>
+      <p>This tool splits the check evenly: per person = grand total ÷ party size. That's the fastest way when everyone spent about the same. For one person's $30 steak against another's $12 salad, even splitting overcharges someone — in that case it's fairer to calculate each tip on the subtotal each person actually consumed.</p>
+    </details>
+  </section>
+
+  <footer>
+    Daily Tools — one small, honest utility built for a real search query. No accounts, no tracking beyond page views.
+  </footer>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const money = (n) => n.toLocaleString("en-US", {style:"currency", currency:"USD"});
+
+const PRESETS = [15, 18, 20, 25];
+const CENT = 100;
+
+function compute() {
+  const bill    = +$("bill").value || 0;
+  const tipPct  = +$("tipPct").value || 0;
+  const party   = Math.max(1, Math.floor(+$("party").value || 1));
+  const taxPct  = +$("taxPct").value || 0;
+  const tipOnTax = $("tipOnTax").checked;
+  const roundUp  = $("roundUp").checked;
+
+  // Core math: tip is a straight multiplication on the chosen base.
+  const tax = bill * (taxPct / 100);
+  const tipBase = tipOnTax ? bill + tax : bill;
+  const exactTip = tipBase * (tipPct / 100);
+  const tip = roundUp ? Math.ceil(exactTip) : exactTip;
+
+  // Grand total = bill + tax + (rounded) tip.
+  const total = bill + tax + tip;
+  const perPerson = total / party;
+
+  // Round-up difference, shown so rounding is never silent.
+  const bump = tip - exactTip;
+
+  // Per-person amounts across presets for a glance comparison.
+  const presetRows = PRESETS.map((p) => {
+    const t = tipBase * (p / 100);
+    return { pct: p, tip: t, total: bill + tax + t, perPerson: (bill + tax + t) / party };
+  });
+
+  return { bill, tipPct, party, tax, tipBase, exactTip, tip, total, perPerson, bump, presetRows };
+}
+
+function render() {
+  const r = compute();
+
+  $("bigLabel").textContent = `Tip on ${money(r.bill)} at ${r.tipPct}%`;
+  $("bigNum").textContent = money(r.tip);
+
+  $("verdict").textContent =
+    `Grand total ${money(r.total)}` +
+    (r.tax > 0 ? ` (includes ${money(r.tax)} tax)` : "") +
+    ` — split ${r.party} ${r.party === 1 ? "way" : "ways"}, that is ${money(r.perPerson)} each.`;
+
+  $("subgrid").innerHTML = [
+    ["Tip", money(r.tip)],
+    ["Total", money(r.total)],
+    ["Per person", money(r.perPerson)],
+  ].map(([k, v]) => `<div class="cell"><div class="k">${k}</div><div class="v">${v}</div></div>`).join("");
+
+  const rows = [...r.presetRows];
+  if (!PRESETS.includes(r.tipPct)) {
+    rows.push({ pct: r.tipPct, tip: r.exactTip, total: r.total, perPerson: r.perPerson });
+  }
+  const maxTotal = Math.max(...rows.map((p) => p.total)) || 1;
+  $("bars").innerHTML = rows.map((row) => {
+    const active = row.pct === r.tipPct;
+    return `<div class="bar-row">
+      <div class="bar-row-label">${row.pct}%${row.pct === r.tipPct ? '<span style="color:var(--muted);font-weight:400"> · picked</span>' : ""}</div>
+      <div class="bar"><i style="width:${(row.total / maxTotal * 100).toFixed(1)}%"></i><b>${money(row.tip)} tip · ${money(row.total)} total</b></div>
+    </div>`;
+  }).join("");
+
+  $("explain").textContent =
+    `Tip = ${money(r.tipBase)}${r.tipOnTax ? " (bill + tax, tip on tax on)" : " (pre-tax bill)"} × ${r.tipPct}% = ${money(r.exactTip)}` +
+    (r.bump > 0.004 ? `, rounded up to ${money(r.tip)} (+${money(r.bump)})` : "") +
+    `. Total = ${money(r.bill)} + tax ${money(r.tax)} + tip ${money(r.tip)}. Per person = ${money(r.total)} ÷ ${r.party} = ${money(r.perPerson)}${r.party > 1 ? " each" : ""}.`;
+
+  $("out").classList.add("show");
+}
+
+// Sync the numeric tip-percent field from preset chips.
+function syncPresetField() {
+  const chosen = document.querySelector("input[name='pct']:checked");
+  if (chosen) $("tipPct").value = chosen.value;
+}
+
+// Keep the preset chips in sync when the percent is typed manually.
+function syncPresetChips() {
+  const v = $("tipPct").value;
+  document.querySelectorAll("input[name='pct']").forEach((el) => { el.checked = el.value === v; });
+}
+
+function syncURL() {
+  const p = new URLSearchParams();
+  [["bill", "bill"], ["tipPct", "tipPct"], ["party", "party"], ["taxPct", "taxPct"]]
+    .forEach(([k, id]) => p.set(k, $(id).value));
+  p.set("onTax", $("tipOnTax").checked ? "1" : "0");
+  p.set("roundUp", $("roundUp").checked ? "1" : "0");
+  history.replaceState(null, "", "?" + p.toString());
+}
+
+function loadURL() {
+  const params = new URLSearchParams(location.search);
+  ["bill", "tipPct", "party", "taxPct"].forEach((id) => {
+    if (params.has(id)) $(id).value = params.get(id);
+  });
+  if (params.has("onTax")) $("tipOnTax").checked = params.get("onTax") === "1";
+  if (params.has("roundUp")) $("roundUp").checked = params.get("roundUp") === "1";
+}
+
+$("f").addEventListener("submit", (e) => { e.preventDefault(); render(); syncURL(); });
+["bill", "tipPct", "party", "taxPct"].forEach((id) => $(id).addEventListener("input", () => {
+  if (id === "tipPct") syncPresetChips();
+  render(); syncURL();
+}));
+["tipOnTax", "roundUp"].forEach((id) => $(id).addEventListener("change", () => { render(); syncURL(); }));
+document.querySelectorAll("input[name='pct']").forEach((el) =>
+  el.addEventListener("change", () => { syncPresetField(); render(); syncURL(); }));
+
+$("copy").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(location.href); $("copy").textContent = "Copied"; }
+  catch { $("copy").textContent = "Copy failed"; }
+  setTimeout(() => $("copy").textContent = "Copy link", 1500);
+});
+
+loadURL();
+render();
+</script>
+</body>
+</html>
